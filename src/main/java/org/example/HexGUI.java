@@ -17,12 +17,12 @@ public class HexGUI {
 
 
     HexGUI() {
-        this.hexString = parseFile(new File("C:\\Users\\panufriev\\Desktop\\hello.txt")); // Читаем из файла и парсим побайтово через пробел в 16СС
+        this.hexString = parseFile(new File(System.getProperty("user.home") + "\\Desktop\\hello.txt")); // Читаем из файла и парсим побайтово через пробел в 16СС
         createTable(16); // Создаем таблицу
     }
 
     private void createTable(int col) {
-        DefaultTableModel tableModel = new DefaultTableModel();
+        DefaultTableModel tableModel = new DefaultTableModel(); // Установить модель по умолчанию
         hexTable.setModel(tableModel);
 
         tableModel.addColumn("Offset");
@@ -30,16 +30,13 @@ public class HexGUI {
             tableModel.addColumn(Integer.toHexString(i).toUpperCase()); // Установить заголовки
         }
 
-        int row = (hexString.length / 16) + 1;
-        int dataInLastRow = hexString.length % 16;
+        int row = (hexString.length / col) + 1;
+        int k = 0;
         for (int i = 0; i < row; i++) {
             Object[] rowData = new Object[col + 1];
-            rowData[0] = String.format("%04X", i * 16); // Шестнадцатиричный сдвиг
-            for (int j = 0; j < col; j++) {
-                if (i == row - 1 && j >= dataInLastRow) {
-                    break;
-                }
-                rowData[j + 1] = hexString[i * col + j];
+            rowData[0] = String.format("%04X", i * col); // Шестнадцатиричный сдвиг
+            for (int j = 0; j < col && k < hexString.length; j++) {
+                rowData[j + 1] = hexString[k++];
             }
             tableModel.addRow(rowData);
         }
