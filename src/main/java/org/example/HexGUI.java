@@ -2,9 +2,6 @@ package org.example;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -20,8 +17,6 @@ public class HexGUI extends JFrame {
 
 
     HexGUI() {
-        this.hexString = parseFile(new File(System.getProperty("user.home") + "\\Desktop\\hello.txt")); // Читаем из файла и парсим побайтово через пробел в 16СС
-        createTable(16); // Создаем таблицу
         createMenu(); // Создаем меню
         initFrameUI(); // Инициализируем фрейм
     }
@@ -62,7 +57,9 @@ public class HexGUI extends JFrame {
         JMenu jmFile = new JMenu("File");
         JMenuItem jmiOpen = new JMenuItem("Open");
         JMenuItem jmiClose = new JMenuItem("Close");
+        jmiClose.setEnabled(false);
         JMenuItem jmiSave = new JMenuItem("Save");
+        jmiSave.setEnabled(false);
         JMenuItem jmiExit = new JMenuItem("Exit");
 
         jmFile.add(jmiOpen);
@@ -74,12 +71,38 @@ public class HexGUI extends JFrame {
         this.jMenuBar.add(jmFile);
 
         // Ввести приемники событий от пунктов меню
-        jmiOpen.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent l) {
-                openFile();
+        jmiOpen.addActionListener(l -> {
+            if (openFile()) {
+                jmiClose.setEnabled(true);
+                jmiSave.setEnabled(true);
             }
         });
+
+        jmiClose.addActionListener(l -> {
+            closeFile();
+            jmiClose.setEnabled(false);
+            jmiSave.setEnabled(false);
+        });
+    }
+
+    private void closeFile() {
+        this.hexString = null;
+        DefaultTableModel model = (DefaultTableModel) hexTable.getModel();
+        model.setColumnCount(0);
+    }
+
+    private boolean openFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            this.hexString = parseFile(selectedFile);
+            createTable(16); //TODO:Добавить всплывающий список с выбором кол-ва столбцов
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void createTable(int col) {
