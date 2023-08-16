@@ -83,6 +83,8 @@ public class HexGUI extends JFrame {
             jmiClose.setEnabled(false);
             jmiSave.setEnabled(false);
         });
+
+        jmiExit.addActionListener(l -> System.exit(0));
     }
 
     private void closeFile() {
