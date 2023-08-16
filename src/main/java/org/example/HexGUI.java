@@ -1,6 +1,8 @@
 package org.example;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.IOException;
@@ -108,9 +110,56 @@ public class HexGUI extends JFrame {
     }
 
     private void createTable(int col) {
-        DefaultTableModel tableModel = new DefaultTableModel(); // Установить модель по умолчанию
-        this.hexTable.setModel(tableModel);
+        // Инициализация моделей
+        DefaultTableModel tableModel = new DefaultTableModel() {
+            // Запрет редактирования 1 колонки
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column != 0;
+            }
+        };
+        TableSelectionModel tableSelectionModel = new TableSelectionModel();
 
+        // Настройка таблицы
+        this.hexTable.setModel(tableModel);
+        this.hexTable.getTableHeader().setReorderingAllowed(false);
+        this.hexTable.getTableHeader().setResizingAllowed(false);
+        this.hexTable.setCellSelectionEnabled(true);
+        this.hexTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        this.hexTable.getColumnModel().setSelectionModel(tableSelectionModel);
+
+        // Заполнение таблицы
+        fillTable(col, tableModel);
+
+        // Задаем начальный курсор на 1 ячейке
+        this.hexTable.setColumnSelectionInterval(1, 1);
+        this.hexTable.setRowSelectionInterval(0, 0);
+
+        ListSelectionListener selectionListener = new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent l) {
+                if (!l.getValueIsAdjusting()) {
+                    int selectedRow = hexTable.getSelectedRow();
+                    int selectedColumn = hexTable.getSelectedColumn();
+
+                    if (selectedRow >= 0 && selectedColumn > 0) {
+                        int endRow = Math.min(selectedRow + 3, hexTable.getRowCount() - 1);
+                        int endColumn = Math.min(selectedColumn + 3, hexTable.getColumnCount() - 1);
+
+                        hexTable.setColumnSelectionInterval(selectedColumn, endColumn);
+                        hexTable.setRowSelectionInterval(selectedRow, endRow);   //TODO ДОДЕЛАТЬ БАГ
+                    }
+                }
+            }
+        };
+
+        this.hexTable.getSelectionModel().addListSelectionListener(selectionListener);
+        this.hexTable.getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
+
+
+    }
+
+    private void fillTable(int col, DefaultTableModel tableModel) {
         tableModel.addColumn("Offset");
         for (int i = 0; i < col; i++) {
             tableModel.addColumn(Integer.toHexString(i).toUpperCase()); // Установить заголовки
