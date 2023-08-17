@@ -135,28 +135,6 @@ public class HexGUI extends JFrame {
         this.hexTable.setColumnSelectionInterval(1, 1);
         this.hexTable.setRowSelectionInterval(0, 0);
 
-        ListSelectionListener selectionListener = new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent l) {
-                if (!l.getValueIsAdjusting()) {
-                    int selectedRow = hexTable.getSelectedRow();
-                    int selectedColumn = hexTable.getSelectedColumn();
-
-                    if (selectedRow >= 0 && selectedColumn > 0) {
-                        int endRow = Math.min(selectedRow + 3, hexTable.getRowCount() - 1);
-                        int endColumn = Math.min(selectedColumn + 3, hexTable.getColumnCount() - 1);
-
-                        hexTable.setColumnSelectionInterval(selectedColumn, endColumn);
-                        hexTable.setRowSelectionInterval(selectedRow, endRow);   //TODO ДОДЕЛАТЬ БАГ
-                    }
-                }
-            }
-        };
-
-        this.hexTable.getSelectionModel().addListSelectionListener(selectionListener);
-        this.hexTable.getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
-
-
     }
 
     private void fillTable(int col, DefaultTableModel tableModel) {
