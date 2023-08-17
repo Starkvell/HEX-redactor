@@ -1,9 +1,9 @@
 package org.example;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -46,13 +46,35 @@ public class HexGUI extends JFrame {
         JMenuItem jmiCopy = new JMenuItem("Copy");
         JMenuItem jmiPaste = new JMenuItem("Paste");
         JMenuItem jmiDelete = new JMenuItem("Delete");
+        JMenuItem jmiColumnCount = new JMenuItem("Change the number of columns");
 
         jmEdit.add(jmiCut);
         jmEdit.add(jmiCopy);
         jmEdit.add(jmiPaste);
         jmEdit.add(jmiDelete);
+        jmEdit.add(jmiColumnCount);
 
         this.jMenuBar.add(jmEdit);
+
+        jmiColumnCount.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ColumnCountInputDialog dialog = new ColumnCountInputDialog();
+                dialog.setLocationRelativeTo(HexGUI.this);
+                dialog.pack();
+                dialog.setVisible(true);
+
+                int columnCount = dialog.getColumnCount();
+                if (columnCount > 0 && hexString != null){
+                    createTable(columnCount);
+                } else {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Не удалось создать таблицу",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
     }
 
     private void createFileMenu() {
