@@ -16,6 +16,7 @@ public class HexGUI extends JFrame {
     private JScrollPane hexScrollPane;
     private JScrollPane resultScrollPane;
     private String[] hexString;
+    private int columnCount = 16;
 
 
     HexGUI() {
@@ -65,11 +66,14 @@ public class HexGUI extends JFrame {
                 dialog.setVisible(true);
 
                 int columnCount = dialog.getColumnCount();
-                if (columnCount > 0 && hexString != null){
-                    createTable(columnCount);
+                if (columnCount > 0) {
+                    HexGUI.this.columnCount = columnCount;
+                    if (hexString != null) {
+                        createTable(HexGUI.this.columnCount);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(dialog,
-                            "Не удалось создать таблицу",
+                            "Введите положительное значение",
                             "Ошибка",
                             JOptionPane.ERROR_MESSAGE);
                 }
@@ -124,7 +128,7 @@ public class HexGUI extends JFrame {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             this.hexString = parseFile(selectedFile);
-            createTable(16); //TODO:Добавить всплывающий список с выбором кол-ва столбцов
+            createTable(columnCount);
             return true;
         } else {
             return false;
