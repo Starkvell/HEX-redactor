@@ -11,10 +11,16 @@ import java.io.RandomAccessFile;
 public class HexGUI extends JFrame {
     private JPanel mainPanel;
     private JMenuBar jMenuBar;
-    private JTextArea resultTextArea;
     private JTable hexTable;
     private JScrollPane hexScrollPane;
-    private JScrollPane resultScrollPane;
+    private JLabel integerLabel;
+    private JLabel integerValueLabel;
+    private JLabel unsignedIntegerLabel;
+    private JLabel unsignedIntegerValueLabel;
+    private JLabel floatLabel;
+    private JLabel floatValueLabel;
+    private JLabel doubleLabel;
+    private JLabel doubleValueLabel;
     private String[] hexString;
     private int columnCount = 16;
 
