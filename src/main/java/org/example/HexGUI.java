@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -170,6 +171,7 @@ public class HexGUI extends JFrame {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getValueIsAdjusting()) { // TODO: Сделать перед clearDataLabel()
+                    clearDataLabel();
                     updateSelectedDataLabel();
                 }
             }
@@ -180,6 +182,13 @@ public class HexGUI extends JFrame {
         // Задаем начальный курсор на 1 ячейке
         this.hexTable.setColumnSelectionInterval(1, 1);
         this.hexTable.setRowSelectionInterval(0, 0);
+    }
+
+    private void clearDataLabel() {
+        integerValueLabel.setText("");
+        unsignedIntegerValueLabel.setText("");
+        floatValueLabel.setText("");
+        doubleValueLabel.setText("");
     }
 
     private void updateSelectedDataLabel() {
@@ -306,7 +315,7 @@ public class HexGUI extends JFrame {
     private void initFrameUI() {
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.pack();
+        this.setSize(1200, 600);
         this.setVisible(true);
     }
 
@@ -315,4 +324,5 @@ public class HexGUI extends JFrame {
             HexGUI hexGUI = new HexGUI();
         });
     }
+
 }
