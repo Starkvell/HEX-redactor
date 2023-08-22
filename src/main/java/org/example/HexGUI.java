@@ -1,12 +1,16 @@
 package org.example;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 public class HexGUI extends JFrame {
     private JPanel mainPanel;
@@ -162,12 +166,103 @@ public class HexGUI extends JFrame {
 
         // Заполнение таблицы
         fillTable(col, tableModel);
+        ListSelectionListener listSelectionListener = new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting()) { // TODO: Сделать перед clearDataLabel()
+                    updateSelectedDataLabel();
+                }
+            }
+        };
+        tableSelectionModel.addListSelectionListener(listSelectionListener);
+        hexTable.getSelectionModel().addListSelectionListener(listSelectionListener);
 
         // Задаем начальный курсор на 1 ячейке
         this.hexTable.setColumnSelectionInterval(1, 1);
         this.hexTable.setRowSelectionInterval(0, 0);
-
     }
+
+    private void updateSelectedDataLabel() {
+        String selectedData = getSelectedData();
+        byte[] bytes = getBytes(selectedData);
+
+        if (selectedData.length() == 2) {
+            updateIntegerValueLabelForByte(bytes);
+            updateUnsignedIntegerValueLabel(selectedData);
+        } else if (selectedData.length() == 4) {
+            updateIntegerValueLabelForShort(bytes);
+            updateUnsignedIntegerValueLabel(selectedData);
+        } else if (selectedData.length() == 8) {
+            updateIntegerValueLabelForInt(bytes);
+            updateUnsignedIntegerValueLabel(selectedData);
+        } else if (selectedData.length() == 16) {
+            updateIntegerValueLabelForLong(bytes);
+            updateUnsignedIntegerValueLabel(selectedData);
+            updateFloatValueLabel(bytes);
+            updateDoubleValueLabel(bytes);
+        }
+    }
+
+    private void updateDoubleValueLabel(byte[] bytes) {
+        double doubleValue = ByteBuffer.wrap(bytes).getDouble();
+        doubleValueLabel.setText(String.valueOf(doubleValue));
+    }
+
+    private void updateFloatValueLabel(byte[] bytes) {
+        float floatValue = ByteBuffer.wrap(bytes).getFloat();
+        floatValueLabel.setText(String.valueOf(floatValue));
+    }
+
+    private void updateIntegerValueLabelForLong(byte[] bytes) {
+        long integerValue = ByteBuffer.wrap(bytes).getLong();
+        integerValueLabel.setText(String.valueOf(integerValue));
+    }
+
+    private void updateIntegerValueLabelForInt(byte[] bytes) {
+        int integerValue = ByteBuffer.wrap(bytes).getInt();
+        integerValueLabel.setText(String.valueOf(integerValue));
+    }
+
+    private void updateIntegerValueLabelForShort(byte[] bytes) {
+        short shortValue = ByteBuffer.wrap(bytes).getShort();
+        integerValueLabel.setText(String.valueOf(shortValue));
+    }
+
+    private void updateIntegerValueLabelForByte(byte[] bytes) {
+        byte byteValue = ByteBuffer.wrap(bytes).get();
+        integerValueLabel.setText(String.valueOf(byteValue));
+    }
+
+    private static byte[] getBytes(String selectedData) {
+        byte[] bytes = new byte[selectedData.length() / 2];
+        for (int i = 0; i < bytes.length; i++) {
+            int index = i * 2;
+            int intValue = Integer.parseInt(selectedData.substring(index, index + 2), 16);
+            bytes[i] = (byte) intValue;
+        }
+        return bytes;
+    }
+
+    private String getSelectedData() {
+        int selectedRow = hexTable.getSelectedRow();
+        int[] selectedColumns = hexTable.getSelectedColumns();
+        StringBuilder stringData = new StringBuilder();
+
+        if (selectedColumns.length == 1 || selectedColumns.length == 2 || selectedColumns.length == 4 || selectedColumns.length == 8) {
+            for (int col : selectedColumns) {
+                Object value = hexTable.getValueAt(selectedRow, col);
+                stringData.append(value);
+            }
+        }
+
+        return stringData.toString();
+    }
+
+    private void updateUnsignedIntegerValueLabel(String stringData) {
+        BigInteger bigInteger = new BigInteger(stringData, 16);
+        unsignedIntegerValueLabel.setText(bigInteger.toString());
+    }
+
 
     private void fillTable(int col, DefaultTableModel tableModel) {
         tableModel.addColumn("Offset");
