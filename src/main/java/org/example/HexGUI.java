@@ -184,6 +184,7 @@ public class HexGUI extends JFrame {
 
     private void updateSelectedDataLabel() {
         String selectedData = getSelectedData();
+        if (selectedData == null) return;
         byte[] bytes = getBytes(selectedData);
 
         if (selectedData.length() == 2) {
@@ -245,6 +246,7 @@ public class HexGUI extends JFrame {
 
     private String getSelectedData() {
         int selectedRow = hexTable.getSelectedRow();
+        if (selectedRow == -1) return null;
         int[] selectedColumns = hexTable.getSelectedColumns();
         StringBuilder stringData = new StringBuilder();
 
