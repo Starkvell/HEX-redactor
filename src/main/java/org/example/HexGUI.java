@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -128,8 +127,16 @@ public class HexGUI extends JFrame {
 
     private void closeFile() {
         this.hexString = null;
-        DefaultTableModel model = (DefaultTableModel) hexTable.getModel();
-        model.setColumnCount(0);
+
+        // Получаем ListSelectionListener и удаляем его из модели таблицы
+        DefaultListSelectionModel selectionModel = (DefaultListSelectionModel) this.hexTable.getColumnModel().getSelectionModel();
+        ListSelectionListener[] listSelectionListeners = selectionModel.getListSelectionListeners();
+        ListSelectionListener listSelectionListener = listSelectionListeners[0];
+        this.hexTable.getColumnModel().getSelectionModel().removeListSelectionListener(listSelectionListener);
+        this.hexTable.getSelectionModel().removeListSelectionListener(listSelectionListener);
+
+        this.hexTable.setModel(new DefaultTableModel());
+        clearDataLabel();
     }
 
     private boolean openFile() {
@@ -170,7 +177,7 @@ public class HexGUI extends JFrame {
         ListSelectionListener listSelectionListener = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                if (e.getValueIsAdjusting()) { // TODO: Сделать перед clearDataLabel()
+                if (e.getValueIsAdjusting()) {
                     clearDataLabel();
                     updateSelectedDataLabel();
                 }
