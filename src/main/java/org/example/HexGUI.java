@@ -199,24 +199,27 @@ public class HexGUI extends JFrame {
     }
 
     private void updateSelectedDataLabel() {
-        String selectedData = getSelectedData();
-        if (selectedData == null) return;
-        byte[] bytes = getBytes(selectedData);
+        try {
+            String selectedData = getSelectedData();
+            byte[] bytes = getBytes(selectedData);
 
-        if (selectedData.length() == 2) {
-            updateIntegerValueLabelForByte(bytes);
-            updateUnsignedIntegerValueLabel(selectedData);
-        } else if (selectedData.length() == 4) {
-            updateIntegerValueLabelForShort(bytes);
-            updateUnsignedIntegerValueLabel(selectedData);
-        } else if (selectedData.length() == 8) {
-            updateIntegerValueLabelForInt(bytes);
-            updateUnsignedIntegerValueLabel(selectedData);
-        } else if (selectedData.length() == 16) {
-            updateIntegerValueLabelForLong(bytes);
-            updateUnsignedIntegerValueLabel(selectedData);
-            updateFloatValueLabel(bytes);
-            updateDoubleValueLabel(bytes);
+            if (selectedData.length() == 2) {
+                updateIntegerValueLabelForByte(bytes);
+                updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 4) {
+                updateIntegerValueLabelForShort(bytes);
+                updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 8) {
+                updateIntegerValueLabelForInt(bytes);
+                updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 16) {
+                updateIntegerValueLabelForLong(bytes);
+                updateUnsignedIntegerValueLabel(selectedData);
+                updateFloatValueLabel(bytes);
+                updateDoubleValueLabel(bytes);
+            }
+        } catch (NullPointerException e){
+            clearDataLabel();
         }
     }
 
@@ -262,13 +265,15 @@ public class HexGUI extends JFrame {
 
     private String getSelectedData() {
         int selectedRow = hexTable.getSelectedRow();
-        if (selectedRow == -1) return null;
         int[] selectedColumns = hexTable.getSelectedColumns();
         StringBuilder stringData = new StringBuilder();
 
         if (selectedColumns.length == 1 || selectedColumns.length == 2 || selectedColumns.length == 4 || selectedColumns.length == 8) {
             for (int col : selectedColumns) {
                 Object value = hexTable.getValueAt(selectedRow, col);
+                if (value == null) {
+                    throw new NullPointerException("The data must not contain null");
+                }
                 stringData.append(value);
             }
         }
