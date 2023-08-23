@@ -6,9 +6,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -96,7 +94,7 @@ public class HexGUI extends JFrame {
         JMenuItem jmiOpen = new JMenuItem("Open");
         JMenuItem jmiClose = new JMenuItem("Close");
         jmiClose.setEnabled(false);
-        JMenuItem jmiSave = new JMenuItem("Save");
+        JMenuItem jmiSave = new JMenuItem("Save as");
         jmiSave.setEnabled(false);
         JMenuItem jmiExit = new JMenuItem("Exit");
 
@@ -122,7 +120,38 @@ public class HexGUI extends JFrame {
             jmiSave.setEnabled(false);
         });
 
+        jmiSave.addActionListener(l -> {
+            saveFileAs();
+        });
+
         jmiExit.addActionListener(l -> System.exit(0));
+    }
+
+    private void saveFileAs() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+
+            if (!selectedFile.exists()) {
+                try {
+                    selectedFile.createNewFile();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(selectedFile))) {
+                for (int i = 0; i < hexTable.getRowCount(); i++) {
+                    for (int j = 1; j < hexTable.getColumnCount(); j++) {
+                        bos.write(getBytesFromHex(hexTable.getValueAt(i,j).toString()));
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void closeFile() {
@@ -145,7 +174,7 @@ public class HexGUI extends JFrame {
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            this.hexString = parseFile(selectedFile);
+            this.hexString = readFile(selectedFile);
             createTable(columnCount);
             return true;
         } else {
@@ -201,7 +230,7 @@ public class HexGUI extends JFrame {
     private void updateSelectedDataLabel() {
         try {
             String selectedData = getSelectedData();
-            byte[] bytes = getBytes(selectedData);
+            byte[] bytes = getBytesFromHex(selectedData);
 
             if (selectedData.length() == 2) {
                 updateIntegerValueLabelForByte(bytes);
@@ -218,7 +247,7 @@ public class HexGUI extends JFrame {
                 updateFloatValueLabel(bytes);
                 updateDoubleValueLabel(bytes);
             }
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             clearDataLabel();
         }
     }
@@ -253,11 +282,11 @@ public class HexGUI extends JFrame {
         integerValueLabel.setText(String.valueOf(byteValue));
     }
 
-    private static byte[] getBytes(String selectedData) {
-        byte[] bytes = new byte[selectedData.length() / 2];
+    private static byte[] getBytesFromHex(String hexData) {
+        byte[] bytes = new byte[hexData.length() / 2];
         for (int i = 0; i < bytes.length; i++) {
             int index = i * 2;
-            int intValue = Integer.parseInt(selectedData.substring(index, index + 2), 16);
+            int intValue = Integer.parseInt(hexData.substring(index, index + 2), 16);
             bytes[i] = (byte) intValue;
         }
         return bytes;
@@ -305,7 +334,7 @@ public class HexGUI extends JFrame {
         }
     }
 
-    private String[] parseFile(File file) {
+    private String[] readFile(File file) {
         String[] result;
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
