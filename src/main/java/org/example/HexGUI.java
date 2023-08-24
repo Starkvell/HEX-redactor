@@ -1,18 +1,29 @@
 package org.example;
 
+import org.example.controller.HexController;
+import org.example.model.HexModel;
+import org.example.view.MenuManager;
+
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.table.TableModel;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 public class HexGUI extends JFrame {
+    private HexModel model;
+    private HexController controller;
+
+    private MenuManager menuManager;
+    private JFileChooser fileChooser;
+
+    private TableSelectionModel tableColumnSelectionModel;
+    private TableModel tableModel;
+    private ListSelectionListener listSelectionModelListener;
+
     private JPanel mainPanel;
-    private JMenuBar jMenuBar;
     private JTable hexTable;
     private JScrollPane hexScrollPane;
     private JLabel integerLabel;
@@ -23,211 +34,103 @@ public class HexGUI extends JFrame {
     private JLabel floatValueLabel;
     private JLabel doubleLabel;
     private JLabel doubleValueLabel;
-    private String[] hexString;
+
     private int columnCount = 16;
 
 
+    //TODO: Создать отдельный класс по таблицу TableManager
     HexGUI() {
+        menuManager = new MenuManager();
+        fileChooser = new JFileChooser();
+        tableModel = new MyTableModel();
+        tableColumnSelectionModel = new TableSelectionModel();
+        model = new HexModel();
+        controller = new HexController(model, this);
+
         createMenu(); // Создаем меню
+        setUpTable(); // Настройка таблицы
         initFrameUI(); // Инициализируем фрейм
+
+        addTableSelectionModelListener(this.listSelectionModelListener);
     }
 
-    private void createMenu() {
-        this.jMenuBar = new JMenuBar();
-
-        createFileMenu(); // Создать меню File
-        createEditMenu(); // Создать меню Edit
-        createHelpMenu(); // Создать меню Help
-
-        setJMenuBar(jMenuBar);
+    public void setListSelectionModelListener(ListSelectionListener listSelectionModelListener) {
+        this.listSelectionModelListener = listSelectionModelListener;
     }
 
-    private void createHelpMenu() {
-        JMenu jmHelp = new JMenu("Help");
-        JMenuItem jmiAbout = new JMenuItem("About");
-        jmHelp.add(jmiAbout);
-        jMenuBar.add(jmHelp);
+    public void setColumnCount(int columnCount) {
+        this.columnCount = columnCount;
     }
 
-    private void createEditMenu() {
-        JMenu jmEdit = new JMenu("Edit");
-        JMenuItem jmiCut = new JMenuItem("Cut");
-        JMenuItem jmiCopy = new JMenuItem("Copy");
-        JMenuItem jmiPaste = new JMenuItem("Paste");
-        JMenuItem jmiDelete = new JMenuItem("Delete");
-        JMenuItem jmiColumnCount = new JMenuItem("Change the number of columns");
-
-        jmEdit.add(jmiCut);
-        jmEdit.add(jmiCopy);
-        jmEdit.add(jmiPaste);
-        jmEdit.add(jmiDelete);
-        jmEdit.add(jmiColumnCount);
-
-        this.jMenuBar.add(jmEdit);
-
-        jmiColumnCount.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ColumnCountInputDialog dialog = new ColumnCountInputDialog();
-                dialog.setLocationRelativeTo(HexGUI.this);
-                dialog.pack();
-                dialog.setVisible(true);
-
-                int columnCount = dialog.getColumnCount();
-                if (columnCount > 0) {
-                    HexGUI.this.columnCount = columnCount;
-                    if (hexString != null) {
-                        createTable(HexGUI.this.columnCount);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(dialog,
-                            "Введите положительное значение",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-    }
-
-    private void createFileMenu() {
-        JMenu jmFile = new JMenu("File");
-        JMenuItem jmiOpen = new JMenuItem("Open");
-        JMenuItem jmiClose = new JMenuItem("Close");
-        jmiClose.setEnabled(false);
-        JMenuItem jmiSave = new JMenuItem("Save as");
-        jmiSave.setEnabled(false);
-        JMenuItem jmiExit = new JMenuItem("Exit");
-
-        jmFile.add(jmiOpen);
-        jmFile.add(jmiClose);
-        jmFile.add(jmiSave);
-        jmFile.addSeparator();
-        jmFile.add(jmiExit);
-
-        this.jMenuBar.add(jmFile);
-
-        // Ввести приемники событий от пунктов меню
-        jmiOpen.addActionListener(l -> {
-            if (openFile()) {
-                jmiClose.setEnabled(true);
-                jmiSave.setEnabled(true);
-            }
-        });
-
-        jmiClose.addActionListener(l -> {
-            closeFile();
-            jmiClose.setEnabled(false);
-            jmiSave.setEnabled(false);
-        });
-
-        jmiSave.addActionListener(l -> {
-            saveFileAs();
-        });
-
-        jmiExit.addActionListener(l -> System.exit(0));
-    }
-
-    private void saveFileAs() {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-
-            if (!selectedFile.exists()) {
-                try {
-                    selectedFile.createNewFile();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-            try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(selectedFile))) {
-                for (int i = 0; i < hexTable.getRowCount(); i++) {
-                    for (int j = 1; j < hexTable.getColumnCount(); j++) {
-                        bos.write(getBytesFromHex(hexTable.getValueAt(i,j).toString()));
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void closeFile() {
-        this.hexString = null;
-
-        // Получаем ListSelectionListener и удаляем его из модели таблицы
-        DefaultListSelectionModel selectionModel = (DefaultListSelectionModel) this.hexTable.getColumnModel().getSelectionModel();
-        ListSelectionListener[] listSelectionListeners = selectionModel.getListSelectionListeners();
-        ListSelectionListener listSelectionListener = listSelectionListeners[0];
-        this.hexTable.getColumnModel().getSelectionModel().removeListSelectionListener(listSelectionListener);
-        this.hexTable.getSelectionModel().removeListSelectionListener(listSelectionListener);
-
-        this.hexTable.setModel(new DefaultTableModel());
-        clearDataLabel();
-    }
-
-    private boolean openFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(null);
-
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            this.hexString = readFile(selectedFile);
-            createTable(columnCount);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void createTable(int col) {
-        // Инициализация моделей
-        DefaultTableModel tableModel = new DefaultTableModel() {
-            // Запрет редактирования 1 колонки
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column != 0;
-            }
-        };
-        TableSelectionModel tableSelectionModel = new TableSelectionModel();
-
-        // Настройка таблицы
+    private void setUpTable() {
         this.hexTable.setModel(tableModel);
         this.hexTable.getTableHeader().setReorderingAllowed(false);
         this.hexTable.getTableHeader().setResizingAllowed(false);
         this.hexTable.setCellSelectionEnabled(true);
         this.hexTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        this.hexTable.getColumnModel().setSelectionModel(tableSelectionModel);
+        this.hexTable.getColumnModel().setSelectionModel(tableColumnSelectionModel);
+    }
+
+    public int getColumnCount() {
+        return columnCount;
+    }
+
+    public MenuManager getMenuManager() {
+        return menuManager;
+    }
+
+    public JTable getHexTable() {
+        return hexTable;
+    }
+
+    public File selectFile() throws IOException {
+        int returnValue = fileChooser.showOpenDialog(this);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile();
+        } else throw new IOException("Файл не выбран");
+    }
+
+    private void createMenu() {
+        setJMenuBar(menuManager.getjMenuBar());
+    }
+
+    public void createTable(int col) {
 
         // Заполнение таблицы
-        fillTable(col, tableModel);
-        ListSelectionListener listSelectionListener = new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (e.getValueIsAdjusting()) {
-                    clearDataLabel();
-                    updateSelectedDataLabel();
-                }
-            }
-        };
-        tableSelectionModel.addListSelectionListener(listSelectionListener);
-        hexTable.getSelectionModel().addListSelectionListener(listSelectionListener);
+        fillTable(col, (DefaultTableModel) tableModel);
 
         // Задаем начальный курсор на 1 ячейке
         this.hexTable.setColumnSelectionInterval(1, 1);
         this.hexTable.setRowSelectionInterval(0, 0);
     }
 
-    private void clearDataLabel() {
+    public void clearTable(){
+        // Удаление слушателя перед очисткой таблицы
+        ListSelectionListener listSelectionListener = this.listSelectionModelListener;
+        hexTable.getSelectionModel().removeListSelectionListener(listSelectionListener);
+
+        // Очистка таблицы
+        DefaultTableModel model = (DefaultTableModel) hexTable.getModel();
+        model.setRowCount(0);
+        model.setColumnCount(0);
+
+        hexTable.getSelectionModel().addListSelectionListener(listSelectionListener);
+    }
+
+    public void addTableSelectionModelListener(ListSelectionListener listener) {
+        hexTable.getSelectionModel().addListSelectionListener(listener);
+        tableColumnSelectionModel.addListSelectionListener(listener);
+    }
+
+    public void clearDataLabel() {
         integerValueLabel.setText("");
         unsignedIntegerValueLabel.setText("");
         floatValueLabel.setText("");
         doubleValueLabel.setText("");
     }
 
-    private void updateSelectedDataLabel() {
+
+    public void updateSelectedDataLabel() {
         try {
             String selectedData = getSelectedData();
             byte[] bytes = getBytesFromHex(selectedData);
@@ -247,7 +150,7 @@ public class HexGUI extends JFrame {
                 updateFloatValueLabel(bytes);
                 updateDoubleValueLabel(bytes);
             }
-        } catch (NullPointerException e) {
+        } catch (RuntimeException runtimeException){
             clearDataLabel();
         }
     }
@@ -282,7 +185,12 @@ public class HexGUI extends JFrame {
         integerValueLabel.setText(String.valueOf(byteValue));
     }
 
-    private static byte[] getBytesFromHex(String hexData) {
+    private void updateUnsignedIntegerValueLabel(String stringData) {
+        BigInteger bigInteger = new BigInteger(stringData, 16);
+        unsignedIntegerValueLabel.setText(bigInteger.toString());
+    }
+
+    public static byte[] getBytesFromHex(String hexData) {
         byte[] bytes = new byte[hexData.length() / 2];
         for (int i = 0; i < bytes.length; i++) {
             int index = i * 2;
@@ -294,6 +202,7 @@ public class HexGUI extends JFrame {
 
     private String getSelectedData() {
         int selectedRow = hexTable.getSelectedRow();
+        if (selectedRow == -1 ) throw new RuntimeException("No data selected");
         int[] selectedColumns = hexTable.getSelectedColumns();
         StringBuilder stringData = new StringBuilder();
 
@@ -310,47 +219,25 @@ public class HexGUI extends JFrame {
         return stringData.toString();
     }
 
-    private void updateUnsignedIntegerValueLabel(String stringData) {
-        BigInteger bigInteger = new BigInteger(stringData, 16);
-        unsignedIntegerValueLabel.setText(bigInteger.toString());
-    }
-
 
     private void fillTable(int col, DefaultTableModel tableModel) {
+        clearTable();
+
         tableModel.addColumn("Offset");
         for (int i = 0; i < col; i++) {
             tableModel.addColumn(Integer.toHexString(i).toUpperCase()); // Установить заголовки
         }
 
-        int row = (hexString.length / col) + 1;
+        int row = (model.getHexString().length / col) + 1;
         int k = 0;
         for (int i = 0; i < row; i++) {
             Object[] rowData = new Object[col + 1];
             rowData[0] = String.format("%04X", i * col); // Шестнадцатиричный сдвиг
-            for (int j = 0; j < col && k < hexString.length; j++) {
-                rowData[j + 1] = hexString[k++];
+            for (int j = 0; j < col && k < model.getHexString().length; j++) {
+                rowData[j + 1] = model.getHexString()[k++];
             }
             tableModel.addRow(rowData);
         }
-    }
-
-    private String[] readFile(File file) {
-        String[] result;
-
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-            byte[] buffer = new byte[(int) raf.length()];
-            raf.readFully(buffer);
-
-            StringBuilder hexContent = new StringBuilder();
-            for (byte b : buffer) {
-                hexContent.append(String.format("%02X ", b));
-            }
-
-            result = hexContent.toString().trim().split(" ");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return result;
     }
 
     private void initFrameUI() {
@@ -366,4 +253,12 @@ public class HexGUI extends JFrame {
         });
     }
 
+}
+
+class MyTableModel extends DefaultTableModel {
+    // Запрет редактирования 1 колонки
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return column != 0;
+    }
 }
