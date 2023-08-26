@@ -36,7 +36,7 @@ public class HexController {
     class OpenFileListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            view.clearDataLabel();
+            view.getStatusBarView().clearDataLabel();
             if (openFile()) {
                 view.getMenuManager().getFileMenuManager().enableSaveAsButton(true);
                 view.getMenuManager().getFileMenuManager().enableCloseFileButton(true);
@@ -89,8 +89,8 @@ public class HexController {
         @Override
         public void valueChanged(ListSelectionEvent e) {
             if (e.getValueIsAdjusting()) {
-                view.clearDataLabel();
-                view.updateSelectedDataLabel();
+                view.getStatusBarView().clearDataLabel();
+                updateSelectedDataLabel();
             }
         }
     }
@@ -110,7 +110,7 @@ public class HexController {
     private void closeFile() {
         model.clearData();
         view.clearTable();
-        view.clearDataLabel();
+        view.getStatusBarView().clearDataLabel();
     }
 
     private void saveFileAs() {
@@ -142,6 +142,31 @@ public class HexController {
         @Override
         public void actionPerformed(ActionEvent e) {
             System.exit(0);
+        }
+    }
+
+    private void updateSelectedDataLabel() {
+        try {
+            String selectedData = view.getSelectedData();
+            byte[] bytes = getBytesFromHex(selectedData);
+
+            if (selectedData.length() == 2) {
+                view.getStatusBarView().updateIntegerValueLabelForByte(bytes);
+                view.getStatusBarView().updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 4) {
+                view.getStatusBarView().updateIntegerValueLabelForShort(bytes);
+                view.getStatusBarView().updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 8) {
+                view.getStatusBarView().updateIntegerValueLabelForInt(bytes);
+                view.getStatusBarView().updateUnsignedIntegerValueLabel(selectedData);
+            } else if (selectedData.length() == 16) {
+                view.getStatusBarView().updateIntegerValueLabelForLong(bytes);
+                view.getStatusBarView().updateUnsignedIntegerValueLabel(selectedData);
+                view.getStatusBarView().updateFloatValueLabel(bytes);
+                view.getStatusBarView().updateDoubleValueLabel(bytes);
+            }
+        } catch (RuntimeException runtimeException){
+            view.getStatusBarView().clearDataLabel();
         }
     }
 }

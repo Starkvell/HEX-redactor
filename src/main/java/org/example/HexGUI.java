@@ -2,20 +2,20 @@ package org.example;
 
 import org.example.controller.HexController;
 import org.example.model.HexModel;
+import org.example.view.StatusBarView;
 import org.example.view.MenuManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-import java.io.*;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
+import java.io.File;
+import java.io.IOException;
 
 public class HexGUI extends JFrame {
     private HexModel model;
     private HexController controller;
-
+    private StatusBarView statusBarView;
     private MenuManager menuManager;
     private JFileChooser fileChooser;
 
@@ -26,14 +26,7 @@ public class HexGUI extends JFrame {
     private JPanel mainPanel;
     private JTable hexTable;
     private JScrollPane hexScrollPane;
-    private JLabel integerLabel;
-    private JLabel integerValueLabel;
-    private JLabel unsignedIntegerLabel;
-    private JLabel unsignedIntegerValueLabel;
-    private JLabel floatLabel;
-    private JLabel floatValueLabel;
-    private JLabel doubleLabel;
-    private JLabel doubleValueLabel;
+
 
     private int columnCount = 16;
 
@@ -83,6 +76,10 @@ public class HexGUI extends JFrame {
         return hexTable;
     }
 
+    public StatusBarView getStatusBarView() {
+        return statusBarView;
+    }
+
     public File selectFile() throws IOException {
         int returnValue = fileChooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -122,73 +119,11 @@ public class HexGUI extends JFrame {
         tableColumnSelectionModel.addListSelectionListener(listener);
     }
 
-    public void clearDataLabel() {
-        integerValueLabel.setText("");
-        unsignedIntegerValueLabel.setText("");
-        floatValueLabel.setText("");
-        doubleValueLabel.setText("");
-    }
 
 
-    public void updateSelectedDataLabel() {
-        try {
-            String selectedData = getSelectedData();
-            byte[] bytes = getBytesFromHex(selectedData);
 
-            if (selectedData.length() == 2) {
-                updateIntegerValueLabelForByte(bytes);
-                updateUnsignedIntegerValueLabel(selectedData);
-            } else if (selectedData.length() == 4) {
-                updateIntegerValueLabelForShort(bytes);
-                updateUnsignedIntegerValueLabel(selectedData);
-            } else if (selectedData.length() == 8) {
-                updateIntegerValueLabelForInt(bytes);
-                updateUnsignedIntegerValueLabel(selectedData);
-            } else if (selectedData.length() == 16) {
-                updateIntegerValueLabelForLong(bytes);
-                updateUnsignedIntegerValueLabel(selectedData);
-                updateFloatValueLabel(bytes);
-                updateDoubleValueLabel(bytes);
-            }
-        } catch (RuntimeException runtimeException){
-            clearDataLabel();
-        }
-    }
 
-    private void updateDoubleValueLabel(byte[] bytes) {
-        double doubleValue = ByteBuffer.wrap(bytes).getDouble();
-        doubleValueLabel.setText(String.valueOf(doubleValue));
-    }
 
-    private void updateFloatValueLabel(byte[] bytes) {
-        float floatValue = ByteBuffer.wrap(bytes).getFloat();
-        floatValueLabel.setText(String.valueOf(floatValue));
-    }
-
-    private void updateIntegerValueLabelForLong(byte[] bytes) {
-        long integerValue = ByteBuffer.wrap(bytes).getLong();
-        integerValueLabel.setText(String.valueOf(integerValue));
-    }
-
-    private void updateIntegerValueLabelForInt(byte[] bytes) {
-        int integerValue = ByteBuffer.wrap(bytes).getInt();
-        integerValueLabel.setText(String.valueOf(integerValue));
-    }
-
-    private void updateIntegerValueLabelForShort(byte[] bytes) {
-        short shortValue = ByteBuffer.wrap(bytes).getShort();
-        integerValueLabel.setText(String.valueOf(shortValue));
-    }
-
-    private void updateIntegerValueLabelForByte(byte[] bytes) {
-        byte byteValue = ByteBuffer.wrap(bytes).get();
-        integerValueLabel.setText(String.valueOf(byteValue));
-    }
-
-    private void updateUnsignedIntegerValueLabel(String stringData) {
-        BigInteger bigInteger = new BigInteger(stringData, 16);
-        unsignedIntegerValueLabel.setText(bigInteger.toString());
-    }
 
     public static byte[] getBytesFromHex(String hexData) {
         byte[] bytes = new byte[hexData.length() / 2];
@@ -200,7 +135,7 @@ public class HexGUI extends JFrame {
         return bytes;
     }
 
-    private String getSelectedData() {
+    public String getSelectedData() {
         int selectedRow = hexTable.getSelectedRow();
         if (selectedRow == -1 ) throw new RuntimeException("No data selected");
         int[] selectedColumns = hexTable.getSelectedColumns();
