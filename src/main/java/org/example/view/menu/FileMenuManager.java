@@ -1,4 +1,4 @@
-package org.example.view;
+package org.example.view.menu;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -28,30 +28,31 @@ public class FileMenuManager {
         jmFile.add(jmiExit);
     }
 
-    public void addOpenFileListener(ActionListener listener){
+    public void addOpenFileListener(ActionListener listener) {
         this.jmiOpen.addActionListener(listener);
     }
 
-    public void addCloseFileListener(ActionListener listener){
+    public void addCloseFileListener(ActionListener listener) {
         this.jmiClose.addActionListener(listener);
     }
 
-    public void addSaveFileAsListener(ActionListener listenern){
+    public void addSaveFileAsListener(ActionListener listenern) {
         this.jmiSaveAs.addActionListener(listenern);
     }
 
-    public void addExitListener(ActionListener listener){
+    public void addExitListener(ActionListener listener) {
         this.jmiExit.addActionListener(listener);
     }
 
-    public void enableSaveAsButton(boolean b){
+    public void enableSaveAsButton(boolean b) {
         jmiSaveAs.setEnabled(b);
     }
 
-    public void enableOpenFileButton(boolean b){
+    public void enableOpenFileButton(boolean b) {
         jmiOpen.setEnabled(b);
     }
-    public void enableCloseFileButton(boolean b){
+
+    public void enableCloseFileButton(boolean b) {
         jmiClose.setEnabled(b);
     }
 

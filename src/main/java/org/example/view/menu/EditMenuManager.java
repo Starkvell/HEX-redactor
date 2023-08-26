@@ -1,10 +1,6 @@
-package org.example.view;
-
-import org.example.ColumnCountInputDialog;
-import org.example.HexGUI;
+package org.example.view.menu;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class EditMenuManager {
@@ -15,6 +11,7 @@ public class EditMenuManager {
     private JMenuItem jmiPaste;
     private JMenuItem jmiDelete;
     private JMenuItem jmiColumnCount;
+
     public EditMenuManager() {
         this.jmEdit = new JMenu("Edit");
         this.jmiCut = new JMenuItem("Cut");
@@ -30,9 +27,10 @@ public class EditMenuManager {
         jmEdit.add(jmiColumnCount);
     }
 
-    public void addChangeColumnCountListener(ActionListener listener){
+    public void addChangeColumnCountListener(ActionListener listener) {
         jmiColumnCount.addActionListener(listener);
     }
+
     public JMenu getJMenuEdit() {
         return jmEdit;
     }

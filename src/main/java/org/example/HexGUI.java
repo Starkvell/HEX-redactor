@@ -3,7 +3,7 @@ package org.example;
 import org.example.controller.HexController;
 import org.example.model.HexModel;
 import org.example.view.StatusBarView;
-import org.example.view.MenuManager;
+import org.example.view.menu.MenuManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
