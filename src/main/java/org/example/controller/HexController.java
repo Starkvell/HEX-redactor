@@ -74,7 +74,8 @@ public class HexController {
             if (columnCount > 0) {
                 view.setColumnCount(columnCount);
                 if (model.getHexString() != null) {
-                    view.createTable(view.getColumnCount());
+                    view.getTableModel().fillTable(view.getColumnCount(), model.getHexString());
+                    view.setStartCursor();
                 }
             } else {
                 JOptionPane.showMessageDialog(dialog,
@@ -99,7 +100,8 @@ public class HexController {
         try {
             File selectedFile = view.selectFile();
             model.readFile(selectedFile);
-            view.createTable(view.getColumnCount());
+            view.getTableModel().fillTable(view.getColumnCount(), model.getHexString());
+            view.setStartCursor();
         } catch (IOException e) {
             return false;
         }
@@ -109,7 +111,7 @@ public class HexController {
 
     private void closeFile() {
         model.clearData();
-        view.clearTable();
+        view.getTableModel().clearTable();
         view.getStatusBarView().clearDataLabel();
     }
 

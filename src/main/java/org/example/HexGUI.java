@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.controller.HexController;
 import org.example.model.HexModel;
+import org.example.model.MyTableModel;
 import org.example.view.StatusBarView;
 import org.example.view.menu.MenuManager;
 
@@ -20,7 +21,7 @@ public class HexGUI extends JFrame {
     private JFileChooser fileChooser;
 
     private TableSelectionModel tableColumnSelectionModel;
-    private TableModel tableModel;
+    private MyTableModel tableModel;
     private ListSelectionListener listSelectionModelListener;
 
     private JPanel mainPanel;
@@ -44,7 +45,8 @@ public class HexGUI extends JFrame {
         setUpTable(); // Настройка таблицы
         initFrameUI(); // Инициализируем фрейм
 
-        addTableSelectionModelListener(this.listSelectionModelListener);
+        addColumnSelectionListener(this.listSelectionModelListener);
+        addRowSelectionListener(this.listSelectionModelListener);
     }
 
     public void setListSelectionModelListener(ListSelectionListener listSelectionModelListener) {
@@ -72,6 +74,10 @@ public class HexGUI extends JFrame {
         return menuManager;
     }
 
+    public MyTableModel getTableModel() {
+        return tableModel;
+    }
+
     public JTable getHexTable() {
         return hexTable;
     }
@@ -91,38 +97,28 @@ public class HexGUI extends JFrame {
         setJMenuBar(menuManager.getjMenuBar());
     }
 
-    public void createTable(int col) {
-
-        // Заполнение таблицы
-        fillTable(col, (DefaultTableModel) tableModel);
-
+    public void setStartCursor(){
         // Задаем начальный курсор на 1 ячейке
         this.hexTable.setColumnSelectionInterval(1, 1);
         this.hexTable.setRowSelectionInterval(0, 0);
     }
 
-    public void clearTable(){
-        // Удаление слушателя перед очисткой таблицы
-        ListSelectionListener listSelectionListener = this.listSelectionModelListener;
+    public void deleteRowSelectionListener(ListSelectionListener listSelectionListener){
+        // Удаление слушателя
         hexTable.getSelectionModel().removeListSelectionListener(listSelectionListener);
+    }
 
-        // Очистка таблицы
-        DefaultTableModel model = (DefaultTableModel) hexTable.getModel();
-        model.setRowCount(0);
-        model.setColumnCount(0);
-
+    private void addRowSelectionListener(ListSelectionListener listSelectionListener) {
         hexTable.getSelectionModel().addListSelectionListener(listSelectionListener);
     }
 
-    public void addTableSelectionModelListener(ListSelectionListener listener) {
-        hexTable.getSelectionModel().addListSelectionListener(listener);
-        tableColumnSelectionModel.addListSelectionListener(listener);
+    private void addColumnSelectionListener(ListSelectionListener listSelectionListener){
+        hexTable.getColumnModel().getSelectionModel().addListSelectionListener(listSelectionListener);
     }
 
-
-
-
-
+    private void deleteColumnSelectionListener(ListSelectionListener listSelectionListener){
+        hexTable.getColumnModel().getSelectionModel().removeListSelectionListener(listSelectionListener);
+    }
 
 
     public static byte[] getBytesFromHex(String hexData) {
@@ -155,26 +151,6 @@ public class HexGUI extends JFrame {
     }
 
 
-    private void fillTable(int col, DefaultTableModel tableModel) {
-        clearTable();
-
-        tableModel.addColumn("Offset");
-        for (int i = 0; i < col; i++) {
-            tableModel.addColumn(Integer.toHexString(i).toUpperCase()); // Установить заголовки
-        }
-
-        int row = (model.getHexString().length / col) + 1;
-        int k = 0;
-        for (int i = 0; i < row; i++) {
-            Object[] rowData = new Object[col + 1];
-            rowData[0] = String.format("%04X", i * col); // Шестнадцатиричный сдвиг
-            for (int j = 0; j < col && k < model.getHexString().length; j++) {
-                rowData[j + 1] = model.getHexString()[k++];
-            }
-            tableModel.addRow(rowData);
-        }
-    }
-
     private void initFrameUI() {
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -188,12 +164,4 @@ public class HexGUI extends JFrame {
         });
     }
 
-}
-
-class MyTableModel extends DefaultTableModel {
-    // Запрет редактирования 1 колонки
-    @Override
-    public boolean isCellEditable(int row, int column) {
-        return column != 0;
-    }
 }
