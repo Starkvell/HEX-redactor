@@ -3,13 +3,12 @@ package org.example;
 import org.example.controller.HexController;
 import org.example.model.HexModel;
 import org.example.model.MyTableModel;
+import org.example.model.TableSelectionModel;
 import org.example.view.StatusBarView;
 import org.example.view.menu.MenuManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.io.File;
 import java.io.IOException;
 

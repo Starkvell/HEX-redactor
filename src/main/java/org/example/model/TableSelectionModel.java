@@ -1,8 +1,6 @@
-package org.example;
+package org.example.model;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class TableSelectionModel extends DefaultListSelectionModel {
     public TableSelectionModel() {
