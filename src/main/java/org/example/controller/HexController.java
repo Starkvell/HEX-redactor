@@ -3,6 +3,7 @@ package org.example.controller;
 import org.example.ColumnCountInputDialog;
 import org.example.HexGUI;
 import org.example.model.HexModel;
+import org.example.view.SearchDialog;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -28,8 +29,9 @@ public class HexController {
         view.getMenuManager().getFileMenuManager().addOpenFileListener(new OpenFileListener());
         view.getMenuManager().getFileMenuManager().addCloseFileListener(new CloseFileListener());
         view.getMenuManager().getFileMenuManager().addSaveFileAsListener(new SaveFileAsListener());
-        view.getMenuManager().getEditMenuManager().addChangeColumnCountListener(new ChangeColumnCountListener());
         view.getMenuManager().getFileMenuManager().addExitListener(new ExitListener());
+        view.getMenuManager().getEditMenuManager().addChangeColumnCountListener(new ChangeColumnCountListener());
+        view.getMenuManager().getEditMenuManager().addFindListener(new FindListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
@@ -169,6 +171,16 @@ public class HexController {
             }
         } catch (RuntimeException runtimeException){
             view.getStatusBarView().clearDataLabel();
+        }
+    }
+
+    class FindListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SearchDialog dialog = new SearchDialog();
+            dialog.setLocationRelativeTo(view);
+            dialog.pack();
+            dialog.setVisible(true);
         }
     }
 }
