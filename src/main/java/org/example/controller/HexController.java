@@ -15,6 +15,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static org.example.HexGUI.getBytesFromHex;
 
@@ -195,6 +197,14 @@ public class HexController {
     class SearchListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (Objects.equals(e.getActionCommand(), "Down")){
+                search(Direction.FORWARD);
+            }else {
+                search(Direction.BACK);
+            }
+        }
+
+        private void search(Direction direction) {
             String searchText = searchDialog.getSearchText();
             if (searchText.isEmpty()){
                 JOptionPane.showMessageDialog(searchDialog,
@@ -204,7 +214,8 @@ public class HexController {
             }
 
             try {
-                search(searchText);
+                Pattern pattern = Pattern.compile(searchText);
+                searchFirst(pattern,direction);
             } catch (RuntimeException exception){
                 JOptionPane.showMessageDialog(searchDialog,
                         "Ничего не было найдено",
@@ -213,14 +224,19 @@ public class HexController {
             }
         }
 
-        private void search(String searchText) {
+        private void searchFirst(Pattern pattern, Direction direction) {
             JTable table = view.getHexTable();
-            Pair<Integer, Integer> nextSelectCell = getNextSelectCell();
+            Pair<Integer, Integer> nextSelectCell;
+            if (direction == Direction.FORWARD){
+                nextSelectCell = getNextSelectCell();
+            } else {
+                nextSelectCell = getPreviousSelectCell();
+            }
 
             for (int row = nextSelectCell.getFirst(); row < table.getRowCount(); row++) {
                 for (int col = nextSelectCell.getSecond(); col < table.getColumnCount(); col++) {
                     String cellText = table.getValueAt(row, col).toString();
-                    if (cellText.contains(searchText)) {
+                    if (pattern.matcher(cellText).find()) {
                         table.setRowSelectionInterval(row, row);
                         table.setColumnSelectionInterval(col, col);
                         table.scrollRectToVisible(table.getCellRect(row, col, true));
@@ -245,6 +261,24 @@ public class HexController {
             } else {
                 nextSelectedCol = 1;
                 nextSelectedRow = 0;
+            }
+            return new Pair<>(nextSelectedRow,nextSelectedCol);
+        }
+
+        public Pair<Integer, Integer> getPreviousSelectCell(){
+            int selectedRow = view.getHexTable().getSelectedRow();
+            int selectedCol = view.getHexTable().getSelectedColumn();
+
+            int nextSelectedRow, nextSelectedCol;
+            if (selectedCol - 1 > 0){
+                nextSelectedCol = selectedCol - 1;
+                nextSelectedRow = selectedRow;
+            } else if (selectedRow - 1 > -1){
+                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
+                nextSelectedRow = selectedRow - 1;
+            } else {
+                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
+                nextSelectedRow = view.getHexTable().getRowCount() - 1;
             }
             return new Pair<>(nextSelectedRow,nextSelectedCol);
         }

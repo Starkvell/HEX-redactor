@@ -20,6 +20,7 @@ public class SearchDialog extends JDialog {
 
     public void addSearchListener(ActionListener listener) {
         buttonDown.addActionListener(listener);
+        buttonUp.addActionListener(listener);
     }
 
     public String getSearchText() {

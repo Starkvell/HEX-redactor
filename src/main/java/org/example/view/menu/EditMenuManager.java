@@ -22,6 +22,12 @@ public class EditMenuManager {
         this.jmiColumnCount = new JMenuItem("Change the number of columns");
         this.jmiFind = new JMenuItem("Find");
 
+        jmiCut.setEnabled(false);
+        jmiCopy.setEnabled(false);
+        jmiPaste.setEnabled(false);
+        jmiDelete.setEnabled(false);
+        jmiFind.setEnabled(false);
+
         jmEdit.add(jmiCut);
         jmEdit.add(jmiCopy);
         jmEdit.add(jmiPaste);
@@ -39,6 +45,22 @@ public class EditMenuManager {
     }
     public void enableFindButton(boolean b){
         jmiFind.setEnabled(b);
+    }
+
+    public void enableCutButton(boolean b){
+        jmiCut.setEnabled(b);
+    }
+
+    public void enableCopyButton(boolean b){
+        jmiCopy.setEnabled(b);
+    }
+
+    public void enablePasteButton(boolean b){
+        jmiPaste.setEnabled(b);
+    }
+
+    public void enableDeleteButton(boolean b){
+        jmiDelete.setEnabled(b);
     }
     public JMenu getJMenuEdit() {
         return jmEdit;
