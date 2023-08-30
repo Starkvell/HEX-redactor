@@ -2,13 +2,13 @@ package org.example.controller;
 
 import org.example.ColumnCountInputDialog;
 import org.example.HexGUI;
+import org.example.Pair;
 import org.example.model.HexModel;
 import org.example.view.SearchDialog;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
@@ -21,10 +21,11 @@ import static org.example.HexGUI.getBytesFromHex;
 public class HexController {
     private HexModel model;
     private HexGUI view;
-
+    private SearchDialog searchDialog;
     public HexController(HexModel model, HexGUI view) {
         this.model = model;
         this.view = view;
+        this.searchDialog = createSearchDialog(view);
 
         view.getMenuManager().getFileMenuManager().addOpenFileListener(new OpenFileListener());
         view.getMenuManager().getFileMenuManager().addCloseFileListener(new CloseFileListener());
@@ -35,6 +36,14 @@ public class HexController {
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
+    private SearchDialog createSearchDialog(HexGUI view) {
+        SearchDialog searchDialog = new SearchDialog();
+        searchDialog.setLocationRelativeTo(view);
+        searchDialog.pack();
+        searchDialog.addSearchListener(new SearchListener());
+        return searchDialog;
+    }
+
     class OpenFileListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -43,6 +52,7 @@ public class HexController {
                 view.getMenuManager().getFileMenuManager().enableSaveAsButton(true);
                 view.getMenuManager().getFileMenuManager().enableCloseFileButton(true);
                 view.getMenuManager().getFileMenuManager().enableOpenFileButton(false);
+                view.getMenuManager().getEditMenuManager().enableFindButton(true);
             }
         }
     }
@@ -54,6 +64,7 @@ public class HexController {
             view.getMenuManager().getFileMenuManager().enableCloseFileButton(false);
             view.getMenuManager().getFileMenuManager().enableSaveAsButton(false);
             view.getMenuManager().getFileMenuManager().enableOpenFileButton(true);
+            view.getMenuManager().getEditMenuManager().enableFindButton(false);
         }
     }
 
@@ -169,7 +180,7 @@ public class HexController {
                 view.getStatusBarView().updateFloatValueLabel(bytes);
                 view.getStatusBarView().updateDoubleValueLabel(bytes);
             }
-        } catch (RuntimeException runtimeException){
+        } catch (RuntimeException runtimeException) {
             view.getStatusBarView().clearDataLabel();
         }
     }
@@ -177,10 +188,65 @@ public class HexController {
     class FindListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            SearchDialog dialog = new SearchDialog();
-            dialog.setLocationRelativeTo(view);
-            dialog.pack();
-            dialog.setVisible(true);
+            searchDialog.setVisible(true);
+        }
+    }
+
+    class SearchListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String searchText = searchDialog.getSearchText();
+            if (searchText.isEmpty()){
+                JOptionPane.showMessageDialog(searchDialog,
+                        "Поле пустое",
+                        "Поиск",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            try {
+                search(searchText);
+            } catch (RuntimeException exception){
+                JOptionPane.showMessageDialog(searchDialog,
+                        "Ничего не было найдено",
+                        "Поиск",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        private void search(String searchText) {
+            JTable table = view.getHexTable();
+            Pair<Integer, Integer> nextSelectCell = getNextSelectCell();
+
+            for (int row = nextSelectCell.getFirst(); row < table.getRowCount(); row++) {
+                for (int col = nextSelectCell.getSecond(); col < table.getColumnCount(); col++) {
+                    String cellText = table.getValueAt(row, col).toString();
+                    if (cellText.contains(searchText)) {
+                        table.setRowSelectionInterval(row, row);
+                        table.setColumnSelectionInterval(col, col);
+                        table.scrollRectToVisible(table.getCellRect(row, col, true));
+                        return;
+                    }
+                }
+            }
+            throw new RuntimeException("Nothing found");
+        }
+
+        public Pair<Integer, Integer> getNextSelectCell(){ //TODO : Перенести в другой клас, скорее всего в HexGui ли TableManager
+            int selectedRow = view.getHexTable().getSelectedRow();
+            int selectedCol = view.getHexTable().getSelectedColumn();
+
+            int nextSelectedRow, nextSelectedCol;
+            if (selectedCol + 1 < view.getHexTable().getColumnCount()){
+                nextSelectedCol = selectedCol + 1;
+                nextSelectedRow = selectedRow;
+            } else if (selectedRow + 1 < view.getHexTable().getRowCount()){
+                nextSelectedCol = 1;
+                nextSelectedRow = selectedRow + 1;
+            } else {
+                nextSelectedCol = 1;
+                nextSelectedRow = 0;
+            }
+            return new Pair<>(nextSelectedRow,nextSelectedCol);
         }
     }
 }
