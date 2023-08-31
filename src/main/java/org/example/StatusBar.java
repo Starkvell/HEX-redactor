@@ -1,10 +1,10 @@
-package org.example.view;
+package org.example;
 
 import javax.swing.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-public class StatusBarView extends JPanel{
+public class StatusBar extends JPanel{
     private JLabel integerLabel;
     private JLabel integerValueLabel;
     private JLabel unsignedIntegerLabel;

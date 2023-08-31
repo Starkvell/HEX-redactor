@@ -4,7 +4,6 @@ import org.example.controller.HexController;
 import org.example.model.HexModel;
 import org.example.model.MyTableModel;
 import org.example.model.TableSelectionModel;
-import org.example.view.StatusBarView;
 import org.example.view.menu.MenuManager;
 
 import javax.swing.*;
@@ -15,7 +14,7 @@ import java.io.IOException;
 public class HexGUI extends JFrame {
     private HexModel model;
     private HexController controller;
-    private StatusBarView statusBarView;
+    private StatusBar statusBar;
     private MenuManager menuManager;
     private JFileChooser fileChooser;
 
@@ -81,8 +80,8 @@ public class HexGUI extends JFrame {
         return hexTable;
     }
 
-    public StatusBarView getStatusBarView() {
-        return statusBarView;
+    public StatusBar getStatusBarView() {
+        return statusBar;
     }
 
     public File selectFile() throws IOException {
@@ -158,9 +157,7 @@ public class HexGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            HexGUI hexGUI = new HexGUI();
-        });
+        SwingUtilities.invokeLater(HexGUI::new);
     }
 
 }

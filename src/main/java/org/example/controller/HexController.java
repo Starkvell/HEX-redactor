@@ -1,8 +1,8 @@
 package org.example.controller;
 
-import org.example.ColumnCountInputDialog;
+import org.example.view.ColumnCountInputDialog;
 import org.example.HexGUI;
-import org.example.Pair;
+import org.example.utility.Pair;
 import org.example.model.HexModel;
 import org.example.view.SearchDialog;
 

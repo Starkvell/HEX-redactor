@@ -36,7 +36,7 @@
           </scrollpane>
         </children>
       </grid>
-      <nested-form id="f66fd" form-file="org/example/view/StatusBarView.form" binding="statusBarView">
+      <nested-form id="f66fd" form-file="org/example/StatusBar.form" binding="statusBar">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>

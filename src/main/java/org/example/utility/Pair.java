@@ -1,4 +1,4 @@
-package org.example;
+package org.example.utility;
 
 public class Pair<A, B> {
     private final A first;
