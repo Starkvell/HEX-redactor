@@ -24,6 +24,7 @@ public class HexController {
     private HexModel model;
     private HexGUI view;
     private SearchDialog searchDialog;
+
     public HexController(HexModel model, HexGUI view) {
         this.model = model;
         this.view = view;
@@ -197,16 +198,16 @@ public class HexController {
     class SearchListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (Objects.equals(e.getActionCommand(), "Down")){
+            if (Objects.equals(e.getActionCommand(), "Down")) {
                 search(Direction.FORWARD);
-            }else {
+            } else {
                 search(Direction.BACK);
             }
         }
 
         private void search(Direction direction) {
             String searchText = searchDialog.getSearchText();
-            if (searchText.isEmpty()){
+            if (searchText.isEmpty()) {
                 JOptionPane.showMessageDialog(searchDialog,
                         "Поле пустое",
                         "Поиск",
@@ -215,8 +216,14 @@ public class HexController {
 
             try {
                 Pattern pattern = Pattern.compile(searchText);
-                searchFirst(pattern,direction);
-            } catch (RuntimeException exception){
+                JTable table = view.getHexTable();
+
+                if (direction == Direction.FORWARD) {
+                    searchForward(table, pattern);
+                } else {
+                    searchBack(table, pattern);
+                }
+            } catch (RuntimeException exception) {
                 JOptionPane.showMessageDialog(searchDialog,
                         "Ничего не было найдено",
                         "Поиск",
@@ -224,17 +231,49 @@ public class HexController {
             }
         }
 
-        private void searchFirst(Pattern pattern, Direction direction) {
-            JTable table = view.getHexTable();
-            Pair<Integer, Integer> nextSelectCell;
-            if (direction == Direction.FORWARD){
-                nextSelectCell = getNextSelectCell();
-            } else {
-                nextSelectCell = getPreviousSelectCell();
-            }
+        public Pair<Integer, Integer> getNextSelectCell() { //TODO : Перенести в другой клас, скорее всего в HexGui ли TableManager
+            int selectedRow = view.getHexTable().getSelectedRow();
+            int selectedCol = view.getHexTable().getSelectedColumn();
 
-            for (int row = nextSelectCell.getFirst(); row < table.getRowCount(); row++) {
-                for (int col = nextSelectCell.getSecond(); col < table.getColumnCount(); col++) {
+            int nextSelectedRow, nextSelectedCol;
+            if (selectedCol + 1 < view.getHexTable().getColumnCount()) {
+                nextSelectedCol = selectedCol + 1;
+                nextSelectedRow = selectedRow;
+            } else if (selectedRow + 1 < view.getHexTable().getRowCount()) {
+                nextSelectedCol = 1;
+                nextSelectedRow = selectedRow + 1;
+            } else {
+                nextSelectedCol = 1;
+                nextSelectedRow = 0;
+            }
+            return new Pair<>(nextSelectedRow, nextSelectedCol);
+        }
+
+        public Pair<Integer, Integer> getPreviousSelectCell() {
+            int selectedRow = view.getHexTable().getSelectedRow();
+            int selectedCol = view.getHexTable().getSelectedColumn();
+
+            int nextSelectedRow, nextSelectedCol;
+            if (selectedCol - 1 > 0) {
+                nextSelectedCol = selectedCol - 1;
+                nextSelectedRow = selectedRow;
+            } else if (selectedRow - 1 > -1) {
+                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
+                nextSelectedRow = selectedRow - 1;
+            } else {
+                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
+                nextSelectedRow = view.getHexTable().getRowCount() - 1;
+            }
+            return new Pair<>(nextSelectedRow, nextSelectedCol);
+        }
+
+
+        private void searchTest(JTable table, Pattern pattern, int startRow, int startCol, int rowIncrement, int colIncrement) {
+            int rowCount = table.getRowCount();
+            int colCount = table.getColumnCount();
+
+            for (int row = startRow; row >= 0 && row < rowCount; row += rowIncrement) {
+                for (int col = startCol; col >= 1 && col < colCount; col += colIncrement) {
                     String cellText = table.getValueAt(row, col).toString();
                     if (pattern.matcher(cellText).find()) {
                         table.setRowSelectionInterval(row, row);
@@ -244,43 +283,18 @@ public class HexController {
                     }
                 }
             }
+
             throw new RuntimeException("Nothing found");
         }
 
-        public Pair<Integer, Integer> getNextSelectCell(){ //TODO : Перенести в другой клас, скорее всего в HexGui ли TableManager
-            int selectedRow = view.getHexTable().getSelectedRow();
-            int selectedCol = view.getHexTable().getSelectedColumn();
-
-            int nextSelectedRow, nextSelectedCol;
-            if (selectedCol + 1 < view.getHexTable().getColumnCount()){
-                nextSelectedCol = selectedCol + 1;
-                nextSelectedRow = selectedRow;
-            } else if (selectedRow + 1 < view.getHexTable().getRowCount()){
-                nextSelectedCol = 1;
-                nextSelectedRow = selectedRow + 1;
-            } else {
-                nextSelectedCol = 1;
-                nextSelectedRow = 0;
-            }
-            return new Pair<>(nextSelectedRow,nextSelectedCol);
+        private void searchBack(JTable table, Pattern pattern) {
+            Pair<Integer, Integer> nextSelectCell = getPreviousSelectCell();
+            searchTest(table, pattern, nextSelectCell.getFirst(), nextSelectCell.getSecond(), -1, -1);
         }
 
-        public Pair<Integer, Integer> getPreviousSelectCell(){
-            int selectedRow = view.getHexTable().getSelectedRow();
-            int selectedCol = view.getHexTable().getSelectedColumn();
-
-            int nextSelectedRow, nextSelectedCol;
-            if (selectedCol - 1 > 0){
-                nextSelectedCol = selectedCol - 1;
-                nextSelectedRow = selectedRow;
-            } else if (selectedRow - 1 > -1){
-                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
-                nextSelectedRow = selectedRow - 1;
-            } else {
-                nextSelectedCol = view.getHexTable().getColumnCount() - 1;
-                nextSelectedRow = view.getHexTable().getRowCount() - 1;
-            }
-            return new Pair<>(nextSelectedRow,nextSelectedCol);
+        private void searchForward(JTable table, Pattern pattern) {
+            Pair<Integer, Integer> nextSelectCell = getNextSelectCell();
+            searchTest(table, pattern, nextSelectCell.getFirst(), nextSelectCell.getSecond(), 1, 1);
         }
     }
 }
