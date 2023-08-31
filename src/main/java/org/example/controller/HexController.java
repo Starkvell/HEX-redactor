@@ -9,6 +9,9 @@ import org.example.view.SearchDialog;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
@@ -37,6 +40,7 @@ public class HexController {
         view.getMenuManager().getEditMenuManager().addChangeColumnCountListener(new ChangeColumnCountListener());
         view.getMenuManager().getEditMenuManager().addFindListener(new FindListener());
         view.getMenuManager().getEditMenuManager().addDeleteListener(new DeleteListener());
+        view.getMenuManager().getEditMenuManager().addCopyListener(new CopyListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
@@ -311,9 +315,34 @@ public class HexController {
 
             for (int selectRow : selectedRows) {
                 for (int selectCol : selectedCols) {
-                    view.getHexTable().setValueAt("00",selectRow,selectCol);
+                    view.getHexTable().setValueAt("00", selectRow, selectCol);
                 }
             }
+        }
+    }
+
+    class CopyListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int[] selectedRows = view.getHexTable().getSelectedRows();
+            int[] selectedCols = view.getHexTable().getSelectedColumns();
+
+            // создаем буфер обмена
+            StringSelection stringSelection = new StringSelection("");
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+            // формируем строку с данными выделенных ячеек
+            StringBuilder builder = new StringBuilder();
+            for (int row : selectedRows) {
+                for (int col : selectedCols) {
+                    builder.append(view.getHexTable().getValueAt(row, col)).append("\t");
+                }
+                builder.append("\n");
+            }
+
+            // помещаем строку в буфер обмена
+            stringSelection = new StringSelection(builder.toString());
+            clipboard.setContents(stringSelection, null);
         }
     }
 }
