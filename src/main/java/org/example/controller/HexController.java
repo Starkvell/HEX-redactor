@@ -41,6 +41,7 @@ public class HexController {
         view.getMenuManager().getEditMenuManager().addFindListener(new FindListener());
         view.getMenuManager().getEditMenuManager().addDeleteListener(new DeleteListener());
         view.getMenuManager().getEditMenuManager().addCopyListener(new CopyListener());
+        view.getMenuManager().getEditMenuManager().addCutListener(new CutListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
@@ -310,13 +311,17 @@ public class HexController {
     class DeleteListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int[] selectedRows = view.getHexTable().getSelectedRows();
-            int[] selectedCols = view.getHexTable().getSelectedColumns();
+            delete();
+        }
+    }
 
-            for (int selectRow : selectedRows) {
-                for (int selectCol : selectedCols) {
-                    view.getHexTable().setValueAt("00", selectRow, selectCol);
-                }
+    private void delete() {
+        int[] selectedRows = view.getHexTable().getSelectedRows();
+        int[] selectedCols = view.getHexTable().getSelectedColumns();
+
+        for (int selectRow : selectedRows) {
+            for (int selectCol : selectedCols) {
+                view.getHexTable().setValueAt("00", selectRow, selectCol);
             }
         }
     }
@@ -324,25 +329,37 @@ public class HexController {
     class CopyListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int[] selectedRows = view.getHexTable().getSelectedRows();
-            int[] selectedCols = view.getHexTable().getSelectedColumns();
+            copy();
+        }
+    }
 
-            // создаем буфер обмена
-            StringSelection stringSelection = new StringSelection("");
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    private void copy() {
+        int[] selectedRows = view.getHexTable().getSelectedRows();
+        int[] selectedCols = view.getHexTable().getSelectedColumns();
 
-            // формируем строку с данными выделенных ячеек
-            StringBuilder builder = new StringBuilder();
-            for (int row : selectedRows) {
-                for (int col : selectedCols) {
-                    builder.append(view.getHexTable().getValueAt(row, col)).append("\t");
-                }
-                builder.append("\n");
+        // создаем буфер обмена
+        StringSelection stringSelection = new StringSelection("");
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        // формируем строку с данными выделенных ячеек
+        StringBuilder builder = new StringBuilder();
+        for (int row : selectedRows) {
+            for (int col : selectedCols) {
+                builder.append(view.getHexTable().getValueAt(row, col)).append("\t");
             }
+            builder.append("\n");
+        }
 
-            // помещаем строку в буфер обмена
-            stringSelection = new StringSelection(builder.toString());
-            clipboard.setContents(stringSelection, null);
+        // помещаем строку в буфер обмена
+        stringSelection = new StringSelection(builder.toString());
+        clipboard.setContents(stringSelection, null);
+    }
+
+    class CutListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            copy();
+            delete();
         }
     }
 }

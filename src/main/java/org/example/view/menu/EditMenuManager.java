@@ -52,6 +52,10 @@ public class EditMenuManager {
         jmiCopy.addActionListener(listener);
     }
 
+    public void addCutListener(ActionListener listener){
+        jmiCut.addActionListener(listener);
+    }
+
     public void enableFindButton(boolean b){
         jmiFind.setEnabled(b);
     }
