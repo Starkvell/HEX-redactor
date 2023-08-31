@@ -78,6 +78,10 @@ public class HexController {
             view.getMenuManager().getFileMenuManager().enableSaveAsButton(false);
             view.getMenuManager().getFileMenuManager().enableOpenFileButton(true);
             view.getMenuManager().getEditMenuManager().enableFindButton(false);
+            view.getMenuManager().getEditMenuManager().enableDeleteButton(false);
+            view.getMenuManager().getEditMenuManager().enableCopyButton(false);
+            view.getMenuManager().getEditMenuManager().enableCutButton(false);
+            view.getMenuManager().getEditMenuManager().enablePasteButton(false);
         }
     }
 
