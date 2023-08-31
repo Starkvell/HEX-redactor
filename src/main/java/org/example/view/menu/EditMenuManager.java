@@ -43,6 +43,11 @@ public class EditMenuManager {
     public void addFindListener(ActionListener listener){
         jmiFind.addActionListener(listener);
     }
+
+    public void addDeleteListener(ActionListener listener){
+        jmiDelete.addActionListener(listener);
+    }
+
     public void enableFindButton(boolean b){
         jmiFind.setEnabled(b);
     }
@@ -62,6 +67,7 @@ public class EditMenuManager {
     public void enableDeleteButton(boolean b){
         jmiDelete.setEnabled(b);
     }
+
     public JMenu getJMenuEdit() {
         return jmEdit;
     }

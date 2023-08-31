@@ -36,6 +36,7 @@ public class HexController {
         view.getMenuManager().getFileMenuManager().addExitListener(new ExitListener());
         view.getMenuManager().getEditMenuManager().addChangeColumnCountListener(new ChangeColumnCountListener());
         view.getMenuManager().getEditMenuManager().addFindListener(new FindListener());
+        view.getMenuManager().getEditMenuManager().addDeleteListener(new DeleteListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
@@ -56,6 +57,10 @@ public class HexController {
                 view.getMenuManager().getFileMenuManager().enableCloseFileButton(true);
                 view.getMenuManager().getFileMenuManager().enableOpenFileButton(false);
                 view.getMenuManager().getEditMenuManager().enableFindButton(true);
+                view.getMenuManager().getEditMenuManager().enableDeleteButton(true);
+                view.getMenuManager().getEditMenuManager().enableCopyButton(true);
+                view.getMenuManager().getEditMenuManager().enableCutButton(true);
+                view.getMenuManager().getEditMenuManager().enablePasteButton(true);
             }
         }
     }
@@ -295,6 +300,20 @@ public class HexController {
         private void searchForward(JTable table, Pattern pattern) {
             Pair<Integer, Integer> nextSelectCell = getNextSelectCell();
             searchTest(table, pattern, nextSelectCell.getFirst(), nextSelectCell.getSecond(), 1, 1);
+        }
+    }
+
+    class DeleteListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int[] selectedRows = view.getHexTable().getSelectedRows();
+            int[] selectedCols = view.getHexTable().getSelectedColumns();
+
+            for (int selectRow : selectedRows) {
+                for (int selectCol : selectedCols) {
+                    view.getHexTable().setValueAt("00",selectRow,selectCol);
+                }
+            }
         }
     }
 }
