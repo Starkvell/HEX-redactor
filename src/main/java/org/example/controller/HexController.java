@@ -10,8 +10,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
@@ -42,6 +41,7 @@ public class HexController {
         view.getMenuManager().getEditMenuManager().addDeleteListener(new DeleteListener());
         view.getMenuManager().getEditMenuManager().addCopyListener(new CopyListener());
         view.getMenuManager().getEditMenuManager().addCutListener(new CutListener());
+        view.getMenuManager().getEditMenuManager().addPasteListener(new PasteListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
     }
 
@@ -360,6 +360,41 @@ public class HexController {
         public void actionPerformed(ActionEvent e) {
             copy();
             delete();
+        }
+    }
+
+    class PasteListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JTable table = view.getHexTable();
+            // получаем буфер обмена
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            Transferable transferable = clipboard.getContents(null);
+
+            // проверяем, что в буфере обмена содержится текст
+            if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                try {
+                    // получаем текст из буфера обмена
+                    String text = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+
+                    // разбиваем текст на строки и ячейки
+                    String[] rows = text.split("\n");
+                    for (int i = 0; i < rows.length; i++) {
+                        String[] cells = rows[i].split("\t");
+
+                        // вставляем значения ячеек в таблицу
+                        for (int j = 0; j < cells.length; j++) {
+                            int row = table.getSelectedRow() + i;
+                            int col = table.getSelectedColumn() + j;
+                            if (row < table.getRowCount() && col < table.getColumnCount()) {
+                                table.setValueAt(cells[j], row, col);
+                            }
+                        }
+                    }
+                } catch (UnsupportedFlavorException | IOException exception) {
+                    exception.printStackTrace();
+                }
+            }
         }
     }
 }
