@@ -7,17 +7,14 @@ public class MenuManager {
     private JMenuBar jMenuBar;
     private FileMenuManager fileMenuManager;
     private EditMenuManager editMenuManager;
-    private HelpMenuManager helpMenuManager;
 
     public MenuManager() {
         this.jMenuBar = new JMenuBar();
         this.fileMenuManager = new FileMenuManager();
         this.editMenuManager = new EditMenuManager();
-        this.helpMenuManager = new HelpMenuManager();
 
-        createFileMenu(); // Создать меню File
-        createEditMenu(); // Создать меню Edit
-        createHelpMenu(); // Создать меню Help
+        createFileMenu();
+        createEditMenu();
     }
 
 
@@ -29,11 +26,6 @@ public class MenuManager {
         this.jMenuBar.add(editMenuManager.getJMenuEdit());
     }
 
-    private void createHelpMenu() {
-        this.jMenuBar.add(helpMenuManager.getJMenuHelp());
-    }
-
-
     public JMenuBar getjMenuBar() {
         return jMenuBar;
     }
@@ -44,9 +36,5 @@ public class MenuManager {
 
     public FileMenuManager getFileMenuManager() {
         return fileMenuManager;
-    }
-
-    public HelpMenuManager getHelpMenuManager() {
-        return helpMenuManager;
     }
 }
