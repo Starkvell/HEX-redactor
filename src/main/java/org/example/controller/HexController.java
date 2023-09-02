@@ -88,7 +88,14 @@ public class HexController {
     private class SaveFileAsListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            saveFileAs();
+            try {
+                saveFileAs();
+            } catch (Exception exception) {
+                JOptionPane.showMessageDialog(null,
+                        "Упс, файл не был сохранен",
+                        "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -145,28 +152,17 @@ public class HexController {
         view.getStatusBarView().clearDataLabel();
     }
 
-    private void saveFileAs() {
-        File selectedFile = null;
-        try {
-            selectedFile = view.selectFile();
-            if (!selectedFile.exists()) {
-                selectedFile.createNewFile();
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    "Упс, файл не был сохранен",
-                    "Ошибка",
-                    JOptionPane.ERROR_MESSAGE);
+    private void saveFileAs() throws IOException {
+        File selectedFile = view.selectFile();
+        if (!selectedFile.exists()) {
+            selectedFile.createNewFile();
         }
-
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(selectedFile))) {
             for (int i = 0; i < view.getHexTable().getRowCount(); i++) {
                 for (int j = 1; j < view.getHexTable().getColumnCount(); j++) {
                     bos.write(getBytesFromHex(view.getHexTable().getValueAt(i, j).toString()));
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

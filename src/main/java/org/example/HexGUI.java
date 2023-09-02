@@ -62,6 +62,7 @@ public class HexGUI extends JFrame {
         this.hexTable.setCellSelectionEnabled(true);
         this.hexTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.hexTable.getColumnModel().setSelectionModel(tableColumnSelectionModel);
+        this.hexTable.setDefaultEditor(Object.class, new TableCellEditor());
     }
 
     public int getColumnCount() {
