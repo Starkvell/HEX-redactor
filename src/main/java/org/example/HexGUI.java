@@ -30,7 +30,7 @@ public class HexGUI extends JFrame {
     private int columnCount = 16;
 
 
-    //TODO: Создать отдельный класс по таблицу TableManager
+
     HexGUI() {
         menuManager = new MenuManager();
         fileChooser = new JFileChooser();

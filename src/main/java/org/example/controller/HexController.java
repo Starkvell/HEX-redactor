@@ -126,8 +126,7 @@ public class HexController {
     class TableSelectionModelListener implements ListSelectionListener {
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if (e.getValueIsAdjusting()) {
-                view.getStatusBarView().clearDataLabel();
+            if (!e.getValueIsAdjusting()) {
                 updateSelectedDataLabel();
             }
         }
@@ -241,7 +240,7 @@ public class HexController {
             }
         }
 
-        public Pair<Integer, Integer> getNextSelectCell() { //TODO : Перенести в другой клас, скорее всего в HexGui ли TableManager
+        public Pair<Integer, Integer> getNextSelectCell() {
             int selectedRow = view.getHexTable().getSelectedRow();
             int selectedCol = view.getHexTable().getSelectedColumn();
 
