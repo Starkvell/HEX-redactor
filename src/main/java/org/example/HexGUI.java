@@ -8,6 +8,7 @@ import org.example.view.menu.MenuManager;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -153,7 +154,9 @@ public class HexGUI extends JFrame {
     private void initFrameUI() {
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(1200, 600);
+        this.setMinimumSize(new Dimension(1300,600));
+        this.setPreferredSize(new Dimension(1300,600));
+        this.pack();
         this.setVisible(true);
     }
 
