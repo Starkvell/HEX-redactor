@@ -26,7 +26,7 @@ public class MyTableModel extends DefaultTableModel {
     public void fillTable(int col, String[] hexString) {
         clearTable();
 
-        addColumn("Offset");
+        addColumn("Offset");   //TODO:Эту часть в конструктор clearTable отдельно
         for (int i = 0; i < col; i++) {
             addColumn(Integer.toHexString(i).toUpperCase()); // Установить заголовки
         }
