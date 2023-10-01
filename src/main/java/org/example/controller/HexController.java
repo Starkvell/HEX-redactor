@@ -1,9 +1,9 @@
 package org.example.controller;
 
+import org.example.model.MyTableModel;
 import org.example.view.ColumnCountInputDialog;
 import org.example.HexGUI;
 import org.example.utility.Pair;
-import org.example.model.HexModel;
 import org.example.view.SearchDialog;
 
 import javax.swing.*;
@@ -23,11 +23,11 @@ import java.util.regex.Pattern;
 import static org.example.HexGUI.getBytesFromHex;
 
 public class HexController {
-    private HexModel model;
+    private MyTableModel model;
     private HexGUI view;
     private SearchDialog searchDialog;
 
-    public HexController(HexModel model, HexGUI view) {
+    public HexController(MyTableModel model, HexGUI view) {
         this.model = model;
         this.view = view;
         this.searchDialog = createSearchDialog(view);

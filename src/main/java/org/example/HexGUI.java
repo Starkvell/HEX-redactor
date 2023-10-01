@@ -1,7 +1,6 @@
 package org.example;
 
 import org.example.controller.HexController;
-import org.example.model.HexModel;
 import org.example.model.MyTableModel;
 import org.example.model.TableSelectionModel;
 import org.example.view.menu.MenuManager;
@@ -13,14 +12,13 @@ import java.io.File;
 import java.io.IOException;
 
 public class HexGUI extends JFrame {
-    private HexModel model;
+    private MyTableModel model;
     private HexController controller;
     private StatusBar statusBar;
     private MenuManager menuManager;
     private JFileChooser fileChooser;
 
     private TableSelectionModel tableColumnSelectionModel;
-    private MyTableModel tableModel;
     private ListSelectionListener listSelectionModelListener;
 
     private JPanel mainPanel;
@@ -35,9 +33,8 @@ public class HexGUI extends JFrame {
     HexGUI() {
         menuManager = new MenuManager();
         fileChooser = new JFileChooser();
-        tableModel = new MyTableModel();
         tableColumnSelectionModel = new TableSelectionModel();
-        model = new HexModel();
+        model = new MyTableModel();
         controller = new HexController(model, this);
 
         createMenu(); // Создаем меню
@@ -57,7 +54,7 @@ public class HexGUI extends JFrame {
     }
 
     private void setUpTable() {
-        this.hexTable.setModel(tableModel);
+        this.hexTable.setModel(model);
         this.hexTable.getTableHeader().setReorderingAllowed(false);
         this.hexTable.getTableHeader().setResizingAllowed(false);
         this.hexTable.setCellSelectionEnabled(true);
@@ -75,7 +72,7 @@ public class HexGUI extends JFrame {
     }
 
     public MyTableModel getTableModel() {
-        return tableModel;
+        return model;
     }
 
     public JTable getHexTable() {
