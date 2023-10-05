@@ -8,6 +8,8 @@ import org.example.view.menu.MenuManager;
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -117,6 +119,9 @@ public class HexGUI extends JFrame {
         hexTable.getColumnModel().getSelectionModel().removeListSelectionListener(listSelectionListener);
     }
 
+    public void addScrollAdjustmentListener(AdjustmentListener adjustmentListener){
+        hexScrollPane.getVerticalScrollBar().addAdjustmentListener(adjustmentListener);
+    }
 
     public static byte[] getBytesFromHex(String hexData) {
         byte[] bytes = new byte[hexData.length() / 2];

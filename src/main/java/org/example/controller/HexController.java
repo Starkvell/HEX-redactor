@@ -13,10 +13,9 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.io.*;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -26,6 +25,7 @@ public class HexController {
     private MyTableModel model;
     private HexGUI view;
     private SearchDialog searchDialog;
+    private File selectedFile;
 
     public HexController(MyTableModel model, HexGUI view) {
         this.model = model;
@@ -43,6 +43,7 @@ public class HexController {
         view.getMenuManager().getEditMenuManager().addCutListener(new CutListener());
         view.getMenuManager().getEditMenuManager().addPasteListener(new PasteListener());
         view.setListSelectionModelListener(new TableSelectionModelListener());
+        view.addScrollAdjustmentListener(new ScrollAdjustmentListener());
     }
 
     private SearchDialog createSearchDialog(HexGUI view) {
@@ -110,8 +111,16 @@ public class HexController {
             int columnCount = dialog.getColumnCount();
             if (columnCount > 0) {
                 view.setColumnCount(columnCount);
-                if (model.getHexString() != null) {
-                    view.getTableModel().fillTable(view.getColumnCount(), model.getHexString());
+                if (model.getDataVector() != null) {
+                    view.getTableModel().clearTable();
+                    view.getTableModel().createTable(view.getColumnCount());
+                    String[] pieceOfData = new String[0];
+                    try {
+                        pieceOfData = model.readFileAndLoadNewPieceOfData(selectedFile);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    view.getTableModel().fillTable(view.getColumnCount(), pieceOfData);
                     view.setStartCursor();
                 }
             } else {
@@ -134,9 +143,10 @@ public class HexController {
 
     private boolean openFile() {
         try {
-            File selectedFile = view.selectFile();
-            model.readFile(selectedFile);
-            view.getTableModel().fillTable(view.getColumnCount(), model.getHexString());
+            selectedFile = view.selectFile();
+            view.getTableModel().createTable(view.getColumnCount());
+            String[] pieceOfData = model.readFileAndLoadNewPieceOfData(selectedFile);
+            view.getTableModel().fillTable(view.getColumnCount(), pieceOfData);
             view.setStartCursor();
         } catch (IOException e) {
             return false;
@@ -146,7 +156,6 @@ public class HexController {
 
 
     private void closeFile() {
-        model.clearData();
         view.getTableModel().clearTable();
         view.getStatusBarView().clearDataLabel();
     }
@@ -392,6 +401,28 @@ public class HexController {
                     }
                 } catch (UnsupportedFlavorException | IOException exception) {
                     exception.printStackTrace();
+                }
+            }
+        }
+    }
+
+    class ScrollAdjustmentListener implements AdjustmentListener {
+        @Override
+        public void adjustmentValueChanged(AdjustmentEvent e) {
+            if (!e.getValueIsAdjusting()) {
+                // Проверяем, если последняя строка видима
+                int scrollBarValue = e.getValue();
+                int scrollBarMaximum = e.getAdjustable().getMaximum();
+                int scrollBarExtent = e.getAdjustable().getVisibleAmount();
+
+                if (scrollBarMaximum != 0 && scrollBarValue + scrollBarExtent == scrollBarMaximum) {
+                    // Последняя строка видима, выполняем необходимое действие
+                    try {
+                        String[] pieceOfData = model.readFileAndLoadNewPieceOfData(selectedFile);
+                        model.fillTable(view.getColumnCount(), pieceOfData);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         }
