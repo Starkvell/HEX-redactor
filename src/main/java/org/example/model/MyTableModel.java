@@ -6,9 +6,11 @@ import java.io.*;
 public class MyTableModel extends DefaultTableModel {
     private final int CountOfLoadingBytes = 1024;
     private long bytePosition = 0;
+    private File file;
 
     public String[] readFileAndLoadNewPieceOfData(File filePath) throws IOException {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
+            file = filePath;
             byte[] buffer = new byte[CountOfLoadingBytes];
             raf.seek(bytePosition);
             int bytesRead = raf.read(buffer);
@@ -61,4 +63,7 @@ public class MyTableModel extends DefaultTableModel {
         }
     }
 
+    public File getFile() {
+        return file;
+    }
 }

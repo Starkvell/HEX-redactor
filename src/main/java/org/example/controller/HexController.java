@@ -91,6 +91,10 @@ public class HexController {
         public void actionPerformed(ActionEvent e) {
             try {
                 saveFileAs();
+                JOptionPane.showMessageDialog(null,
+                        "Файл успешно сохранен",
+                        "Успех",
+                        JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception exception) {
                 JOptionPane.showMessageDialog(null,
                         "Упс, файл не был сохранен",
@@ -165,12 +169,25 @@ public class HexController {
         if (!selectedFile.exists()) {
             selectedFile.createNewFile();
         }
-        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(selectedFile))) {
+
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(selectedFile));
+             FileInputStream fis = new FileInputStream(model.getFile())) {
+            long bytesWritten = 0;
             for (int i = 0; i < view.getHexTable().getRowCount(); i++) {
                 for (int j = 1; j < view.getHexTable().getColumnCount(); j++) {
                     bos.write(getBytesFromHex(view.getHexTable().getValueAt(i, j).toString()));
+                    bytesWritten ++;
                 }
             }
+
+            fis.skip(bytesWritten);
+
+            int bytesRead;
+            byte[] buffer = new byte[1024];
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                bos.write(buffer, 0, bytesRead); // Записываем считанные байты в выходной поток
+            }
+
         }
     }
 
