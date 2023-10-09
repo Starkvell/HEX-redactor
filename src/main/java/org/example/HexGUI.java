@@ -157,7 +157,7 @@ public class HexGUI extends JFrame {
         this.setContentPane(mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setMinimumSize(new Dimension(1300,600));
-        this.setPreferredSize(new Dimension(1300,600));
+        this.setPreferredSize(new Dimension(1300,700));
         this.pack();
         this.setVisible(true);
     }
