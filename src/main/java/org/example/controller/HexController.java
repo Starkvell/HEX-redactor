@@ -203,6 +203,8 @@ public class HexController {
             String selectedData = view.getSelectedData();
             byte[] bytes = getBytesFromHex(selectedData);
 
+            view.getStatusBarView().clearDataLabel();
+
             if (selectedData.length() == 2) {
                 view.getStatusBarView().updateIntegerValueLabelForByte(bytes);
                 view.getStatusBarView().updateUnsignedIntegerValueLabel(selectedData);
