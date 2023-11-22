@@ -331,7 +331,22 @@ public class HexController {
 
         private void searchForward(JTable table, Pattern pattern) {
             Pair<Integer, Integer> nextSelectCell = getNextSelectCell();
-            searchTest(table, pattern, nextSelectCell.getFirst(), nextSelectCell.getSecond(), 1, 1);
+            try {
+                searchTest(table, pattern, nextSelectCell.getFirst(), nextSelectCell.getSecond(), 1, 1);
+            } catch (RuntimeException ex){
+                int endRow = table.getRowCount() - 1;
+                int endCol = table.getColumnCount() - 1;
+
+                table.scrollRectToVisible(table.getCellRect(table.getRowCount() - 1, table.getColumnCount() - 1, true));
+
+                int endRowAfterScroll = table.getRowCount() - 1;
+                int endColAfterScroll = table.getColumnCount() - 1;
+
+                if (endRow == endRowAfterScroll && endCol == endColAfterScroll)
+                    throw new RuntimeException("Not found");
+
+                searchForward(table, pattern);
+            }
         }
     }
 
