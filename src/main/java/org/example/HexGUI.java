@@ -3,6 +3,7 @@ package org.example;
 import org.example.controller.HexController;
 import org.example.model.MyTableModel;
 import org.example.model.TableSelectionModel;
+import org.example.utility.FileMode;
 import org.example.view.menu.MenuManager;
 
 import javax.swing.*;
@@ -85,8 +86,13 @@ public class HexGUI extends JFrame {
         return statusBar;
     }
 
-    public File selectFile() throws IOException {
-        int returnValue = fileChooser.showOpenDialog(this);
+    public File selectFile(FileMode fileMode) throws IOException {
+        int returnValue;
+        if (fileMode == FileMode.OPEN)
+            returnValue = fileChooser.showOpenDialog(this);
+        else
+            returnValue = fileChooser.showSaveDialog(this);
+
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             return fileChooser.getSelectedFile();
         } else throw new IOException("Файл не выбран");

@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.model.MyTableModel;
+import org.example.utility.FileMode;
 import org.example.view.ColumnCountInputDialog;
 import org.example.HexGUI;
 import org.example.utility.Pair;
@@ -147,7 +148,7 @@ public class HexController {
 
     private boolean openFile() {
         try {
-            selectedFile = view.selectFile();
+            selectedFile = view.selectFile(FileMode.OPEN);
             view.getTableModel().createTable(view.getColumnCount());
             String[] pieceOfData = model.readFileAndLoadNewPieceOfData(selectedFile);
             view.getTableModel().fillTable(view.getColumnCount(), pieceOfData);
@@ -165,7 +166,7 @@ public class HexController {
     }
 
     private void saveFileAs() throws IOException {
-        File selectedFile = view.selectFile();
+        File selectedFile = view.selectFile(FileMode.SAVE);
         if (!selectedFile.exists()) {
             selectedFile.createNewFile();
         }
@@ -175,7 +176,12 @@ public class HexController {
             long bytesWritten = 0;
             for (int i = 0; i < view.getHexTable().getRowCount(); i++) {
                 for (int j = 1; j < view.getHexTable().getColumnCount(); j++) {
-                    bos.write(getBytesFromHex(view.getHexTable().getValueAt(i, j).toString()));
+                    Object valueAt = view.getHexTable().getValueAt(i, j);
+                    if (valueAt == null){
+                        break;
+                    }
+
+                    bos.write(getBytesFromHex(valueAt.toString()));
                     bytesWritten ++;
                 }
             }
